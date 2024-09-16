@@ -1,39 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import useModule from '../hooks/useModule'
 
 const App = () => {
-    const [UMDComponent, setUMDComponent] = useState(null);
+    const scriptUrl = '/wallet-ui.js';
+    const { module, error } = useModule(scriptUrl, 'walletUI');
 
-    useEffect(() => {
-        const loadComponent = async () => {
-            try {
-                // Load the script
-                const script = document.createElement('script');
-                // script.src = 'https://fullpokerface.github.io/MFE-component/index.js';
-                script.src = 'http://localhost:3001/index.js';
 
-                script.async = true;
+    if (error) {
+        return <div>Error loading wallet UI: {error.message}</div>;
+    }
 
-                // Wait for the script to load
-                await new Promise((resolve, reject) => {
-                    script.onload = resolve;
-                    script.onerror = reject;
-                    document.body.appendChild(script);
-                });
+    if (!module) {
+        return <div>Loading...</div>;
+    }
 
-                // Access the loaded component
-                const loadedComponent = window.ReactWebpackModule.App;
-                setUMDComponent(() => loadedComponent);
-            } catch (error) {
-                console.error('Failed to load UMD component:', error);
-            }
-        };
+    const { COMPANY, App, increment } = module.default;
 
-        loadComponent();
-    }, []);
+
 
     return (
         <div>
-            {UMDComponent ? <UMDComponent /> : <p>Loading button...</p>}
+            <h1>Main Application</h1>
+            <h1>Wallet-UI resources</h1>
+            <p>const COMPANY= {COMPANY}</p>
+            <p>App:</p>
+            {App && <App />}
+            {/* {WrappedApp && <WrappedApp />}  // This will render the App with the Provider */}
+            {/* <button onClick={increment}>Increment (from Wallet UI)</button> */}
         </div>
     );
 };
